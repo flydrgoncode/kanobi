@@ -1,0 +1,47 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+dist
+build
+.next
+out
+.turbo
+
+# Tauri
+apps/desktop/src-tauri/target
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode
+.idea
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Testing
+coverage
+
+# Expo
+apps/mobile/.expo
+apps/mobile/ios
+apps/mobile/android
