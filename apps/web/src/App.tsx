@@ -1,10 +1,13 @@
 import { Routes, Route } from "react-router-dom";
-import Welcome from "./pages/Welcome";
+import { ThemeProvider } from "./context/theme";
+import Home from "./pages/Home";
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Welcome />} />
-    </Routes>
+    <ThemeProvider>
+      <Routes>
+        <Route path="/" element={<Home />} />
+      </Routes>
+    </ThemeProvider>
   );
 }
