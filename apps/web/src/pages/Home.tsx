@@ -50,7 +50,7 @@ export default function Home() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 400, damping: 30 }}
-        className="bg-bg-surface p-10 border border-border-subtle shadow-card mb-8"
+        className="bg-bg-surface rounded p-10 border border-border-subtle shadow-card mb-8"
       >
         <div className="text-[11px] font-bold text-accent-neutral tracking-[0.15em] uppercase mb-4">
           Early Preview · v0.1.0
@@ -94,7 +94,7 @@ export default function Home() {
               stiffness: 400,
               damping: 30,
             }}
-            className="bg-bg-surface p-6 border border-border-subtle shadow-card hover:shadow-card-hover transition-shadow duration-500 flex flex-col gap-4"
+            className="bg-bg-surface rounded p-6 border border-border-subtle shadow-card hover:shadow-card-hover transition-shadow duration-500 flex flex-col gap-4"
           >
             <div className="w-9 h-9 bg-bg-hover flex items-center justify-center">
               <f.icon className="w-[18px] h-[18px] text-text-main" strokeWidth={1.5} />
@@ -116,7 +116,7 @@ export default function Home() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.25, type: "spring", stiffness: 400, damping: 30 }}
-        className="bg-bg-surface p-8 border border-border-subtle shadow-card"
+        className="bg-bg-surface rounded p-8 border border-border-subtle shadow-card"
       >
         <h2 className="text-[11px] font-semibold text-text-muted uppercase tracking-[0.06em] mb-6">
           Estado do Sistema
