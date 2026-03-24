@@ -27,7 +27,7 @@ export function Header({ section }: HeaderProps) {
           <input
             type="text"
             placeholder="Search..."
-            className="pl-10 pr-4 py-2 bg-bg-hover hover:bg-bg-active border border-transparent rounded-full text-[13px] focus:bg-bg-surface focus:ring-1 focus:ring-border-strong transition-all w-56 outline-none placeholder:text-text-muted text-text-main"
+            className="pl-10 pr-4 py-2 bg-bg-hover hover:bg-bg-active border border-transparent text-[13px] focus:bg-bg-surface focus:ring-1 focus:ring-border-strong transition-all w-56 outline-none placeholder:text-text-muted text-text-main"
           />
         </div>
 
@@ -46,11 +46,11 @@ export function Header({ section }: HeaderProps) {
         {/* Notifications */}
         <button className="relative text-text-muted hover:text-text-main transition-colors">
           <Bell className="w-[20px] h-[20px]" strokeWidth={1.5} />
-          <span className="absolute top-0 right-0 w-2 h-2 bg-accent-negative rounded-full border-2 border-bg-base" />
+          <span className="absolute top-0 right-0 w-2 h-2 bg-accent-negative border-2 border-bg-base" />
         </button>
 
         {/* Avatar */}
-        <div className="w-8 h-8 rounded-full bg-bg-inverse flex items-center justify-center border border-border-subtle shadow-sm">
+        <div className="w-8 h-8 bg-bg-inverse flex items-center justify-center border border-border-subtle shadow-sm">
           <span className="text-[12px] font-semibold text-text-inverse">R</span>
         </div>
       </div>
