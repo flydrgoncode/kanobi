@@ -1,13 +1,14 @@
 import "dotenv/config";
-import Database from "better-sqlite3";
-import { migrate } from "drizzle-orm/better-sqlite3/migrator";
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import path from "path";
+import { drizzle } from "drizzle-orm/postgres-js";
+import { migrate } from "drizzle-orm/postgres-js/migrator";
+import postgres from "postgres";
 
-const dbPath = process.env.DATABASE_PATH ?? path.join(process.cwd(), "kanobi.db");
-const sqlite = new Database(dbPath);
-const db = drizzle(sqlite);
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) throw new Error("DATABASE_URL is not set");
 
-migrate(db, { migrationsFolder: "./drizzle" });
+const client = postgres(connectionString, { max: 1 });
+const db = drizzle(client);
+
+await migrate(db, { migrationsFolder: "./drizzle" });
 console.log("Migrations applied.");
-sqlite.close();
+await client.end();

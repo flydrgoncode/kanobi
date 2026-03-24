@@ -1,4 +1,19 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: kanobi
+      POSTGRES_PASSWORD: kanobi
+      POSTGRES_DB: kanobi
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kanobi"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   backend:
     build:
       context: .
@@ -9,9 +24,11 @@ services:
       NODE_ENV: production
       PORT: 3737
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
-      DATABASE_PATH: /data/kanobi.db
-    volumes:
-      - db_data:/data
+      DATABASE_URL: postgres://kanobi:kanobi@postgres:5432/kanobi
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3737/api/health"]
@@ -31,4 +48,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  db_data:
+  pg_data:
