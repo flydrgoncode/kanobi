@@ -9,13 +9,13 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  server: {
-    port: 5173,
-    proxy: {
-      "/api": {
-        target: "http://localhost:3737",
-        changeOrigin: true,
+    server: {
+      port: 5173,
+      proxy: {
+        "/api": {
+        target: "http://localhost:3738",
+          changeOrigin: true,
+        },
       },
     },
-  },
 });

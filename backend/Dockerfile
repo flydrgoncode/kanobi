@@ -21,12 +21,13 @@ RUN pnpm --filter @kanobi/backend build
 # Runtime
 FROM node:22-alpine AS runner
 RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
-WORKDIR /app
+WORKDIR /app/backend
 ENV NODE_ENV=production
 
 COPY --from=builder /app/backend/dist ./dist
 COPY --from=builder /app/backend/package.json ./package.json
-COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/backend/node_modules ./node_modules
+COPY --from=builder /app/node_modules/.pnpm /app/node_modules/.pnpm
 
 EXPOSE 3737
 CMD ["node", "dist/index.js"]

@@ -4,8 +4,8 @@
 @tailwind utilities;
 
 :root {
-  --bg-base: #F7F7F9;
-  --bg-surface: #FFFFFF;
+  --bg-base: #f4f5f7;
+  --bg-surface: #ffffff;
   --bg-hover: rgba(0, 0, 0, 0.04);
   --bg-active: rgba(0, 0, 0, 0.08);
   --bg-inverse: #111113;
@@ -24,6 +24,12 @@
 
   --shadow-card: 0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
   --shadow-card-hover: 0 8px 24px rgba(0,0,0,0.06);
+
+  --context-accent: #2d5fff;
+  --context-soft: rgba(45, 95, 255, 0.1);
+  --context-border: rgba(45, 95, 255, 0.22);
+  --sidebar-bg: #0d1320;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
 }
 
 .dark {
@@ -47,6 +53,30 @@
 
   --shadow-card: 0 2px 8px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.2);
   --shadow-card-hover: 0 8px 24px rgba(0,0,0,0.6);
+
+  --sidebar-bg: #07090e;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+}
+
+.app-context-workspace {
+  --context-accent: #2d5fff;
+  --context-soft: rgba(45, 95, 255, 0.1);
+  --context-border: rgba(45, 95, 255, 0.2);
+  --sidebar-bg: linear-gradient(180deg, #0d1320 0%, #121927 100%);
+}
+
+.app-context-mission-control {
+  --context-accent: #bf5a14;
+  --context-soft: rgba(191, 90, 20, 0.12);
+  --context-border: rgba(191, 90, 20, 0.22);
+  --sidebar-bg: linear-gradient(180deg, #27170d 0%, #1a110a 100%);
+}
+
+.app-context-cowork {
+  --context-accent: #0f8a6c;
+  --context-soft: rgba(15, 138, 108, 0.12);
+  --context-border: rgba(15, 138, 108, 0.22);
+  --sidebar-bg: linear-gradient(180deg, #0d2320 0%, #0c1917 100%);
 }
 
 body {
@@ -55,6 +85,59 @@ body {
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.sidebar-shell {
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
+}
+
+.panel {
+  @apply rounded-2xl border border-border-subtle bg-bg-surface shadow-card;
+}
+
+.modal-surface {
+  background: color-mix(in srgb, var(--bg-surface) 72%, white 28%);
+  border-color: color-mix(in srgb, var(--border-strong) 62%, var(--context-border) 38%);
+  box-shadow:
+    0 22px 54px rgba(0, 0, 0, 0.16),
+    0 8px 22px rgba(0, 0, 0, 0.07);
+}
+
+.dark .modal-surface {
+  background: color-mix(in srgb, var(--bg-surface) 62%, #283246 38%);
+  box-shadow:
+    0 24px 56px rgba(0, 0, 0, 0.48),
+    0 10px 26px rgba(0, 0, 0, 0.24);
+}
+
+.context-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  border: 1px solid var(--context-border);
+  background: var(--context-soft);
+  color: var(--context-accent);
+  padding: 0.45rem 0.8rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.action-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-bottom: 1px solid transparent;
+  color: var(--context-accent);
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: border-color 160ms ease, opacity 160ms ease;
+}
+
+.action-link:hover {
+  border-color: var(--context-accent);
 }
 
 ::-webkit-scrollbar {

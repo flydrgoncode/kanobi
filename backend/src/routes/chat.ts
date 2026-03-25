@@ -19,6 +19,13 @@ chatRouter.post(
   "/",
   zValidator("json", messageSchema),
   async (c) => {
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return c.json(
+        { error: "ANTHROPIC_API_KEY is not configured on the backend." },
+        500
+      );
+    }
+
     const { messages } = c.req.valid("json");
 
     const result = streamText({
@@ -27,6 +34,6 @@ chatRouter.post(
       system: "You are Kanobi, a helpful AI assistant.",
     });
 
-    return result.toDataStreamResponse();
+    return result.toTextStreamResponse();
   }
 );

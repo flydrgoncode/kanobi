@@ -5,6 +5,8 @@ services:
       POSTGRES_USER: kanobi
       POSTGRES_PASSWORD: kanobi
       POSTGRES_DB: kanobi
+    ports:
+      - "55432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
     restart: unless-stopped
@@ -19,7 +21,7 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     ports:
-      - "3737:3737"
+      - "3738:3737"
     environment:
       NODE_ENV: production
       PORT: 3737
@@ -41,7 +43,7 @@ services:
       context: .
       dockerfile: apps/web/Dockerfile
     ports:
-      - "5173:80"
+      - "5180:80"
     depends_on:
       backend:
         condition: service_healthy
