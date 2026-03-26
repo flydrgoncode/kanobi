@@ -192,6 +192,14 @@ export default function CoworkMeetingTypes() {
               </div>
             </div>
 
+            <div className="border-b border-border-subtle px-8 py-3">
+              <div className="grid items-center gap-4 xl:grid-cols-[minmax(220px,1fr)_140px_minmax(220px,1fr)_170px]">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Cadência</div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Frequência</div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Descrição</div>
+                <div className="text-right text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Ações</div>
+              </div>
+            </div>
             <div className="divide-y divide-border-subtle">
               {visibleTypes.map((type) => (
                 <article key={type.id} className="grid items-center gap-4 px-8 py-4 xl:grid-cols-[minmax(220px,1fr)_140px_minmax(220px,1fr)_170px]">

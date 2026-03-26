@@ -346,6 +346,14 @@ export default function Companies() {
             </div>
           </div>
 
+          <div className="border-b border-border-subtle px-8 py-3">
+            <div className="grid items-center gap-4 xl:grid-cols-[minmax(320px,1.25fr)_minmax(260px,1fr)_130px_210px]">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Empresa</div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Dados base</div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Estado</div>
+              <div className="text-right text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Ações</div>
+            </div>
+          </div>
           <div className="divide-y divide-border-subtle">
             {isLoading ? (
               <div className="px-8 py-6 text-sm text-text-muted">

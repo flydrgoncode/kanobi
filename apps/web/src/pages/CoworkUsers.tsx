@@ -291,6 +291,14 @@ export default function CoworkUsers() {
               </div>
             </div>
 
+            <div className="border-b border-border-subtle px-8 py-3">
+              <div className="grid items-center gap-4 xl:grid-cols-[minmax(280px,1.1fr)_minmax(220px,0.9fr)_120px_190px]">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Utilizador</div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Detalhe</div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Estado</div>
+                <div className="text-right text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Ações</div>
+              </div>
+            </div>
             <div className="divide-y divide-border-subtle">
               {isLoading ? (
                 <div className="px-8 py-6 text-sm text-text-muted">

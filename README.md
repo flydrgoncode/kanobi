@@ -1,176 +1,317 @@
 # Kanobi
 
-A modern, AI-native cross-platform application — web, mobile, and desktop. Powered by LLMs, built for humans.
+Kanobi is a multi-tenant strategy and operations platform with three distinct product surfaces:
 
----
+- `Mission Control`
+  Global admin surface operated by the `god` user.
+- `Workspace`
+  Tenant-aware company administration surface.
+- `Cowork`
+  Tenant-first collaboration surface where companies work on strategy, groups and meetings.
 
-## Recreate This Project from Scratch (macOS)
+The current implementation is built around a single PostgreSQL database, a Hono backend, and a React/Vite frontend.
 
-> This section is written for another LLM or developer to fully reproduce this project on the same macOS environment.
+## What The App Is
 
-### Prerequisites
+Kanobi is inspired by the V2MOM operating model and is being shaped into a real SaaS product with:
 
-| Tool | Version | Install |
-|---|---|---|
-| macOS | 14+ (Sonoma) or 15+ (Sequoia) | — |
-| Node.js | ≥ 22 | `brew install node` |
-| pnpm | 9.15.4 | `npm install -g pnpm` or `sudo npm install -g pnpm` |
-| Git | any | pre-installed on macOS |
-| GitHub CLI | any | `brew install gh` |
-| Docker Desktop | any | https://docs.docker.com/desktop/mac/install/ |
-| Rust + Cargo | stable | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh` (required for Tauri desktop) |
-| Xcode CLI Tools | any | `xcode-select --install` |
+- tenant and user management
+- company onboarding and company administration
+- workspace roles and permission blocks
+- LLM and email configuration
+- `Cowork` strategy entities:
+  - vision
+  - values
+  - obstacles
+- `Cowork` collaboration and operational entities:
+  - groups
+  - meetings
+  - meeting cadence/types
 
-> **Note on pnpm:** If `npm install -g pnpm` fails with EACCES, run with `sudo` or install via `corepack enable && corepack prepare pnpm@9.15.4 --activate` (also may need sudo on system Node installs).
+There is a special tenant called `Zero` used by `Mission Control` for platform-level setup.
 
-### Environment Variables
+## Product Surfaces
 
-Create `.env` at the repo root (copy from `.env.example`):
+### Mission Control
 
-```bash
-cp .env.example .env
-```
+Global surface for the `god` user. It includes:
 
-Fill in:
+- dashboard
+- users
+- convites
+- companies
+- permissions
+- Zero setup
+  - Platform
+  - Seed Data
+  - Danger Zone
 
-```env
-ANTHROPIC_API_KEY=sk-ant-...   # Required — get at console.anthropic.com
-PORT=3737
-NODE_ENV=development
-JWT_SECRET=change-me-in-production
-DATABASE_PATH=./kanobi.db
-CORS_ORIGINS=http://localhost:5173,tauri://localhost
-```
+Mission Control supports:
 
-### Clone and Run
+- `God mode`
+  - sees all companies, users and requests
+- `Tenant mode`
+  - chosen from the company selector at the top
+  - filters users, companies, requests and permissions by company
+
+### Workspace
+
+Company administration surface. Right now it includes:
+
+- users
+- convites
+- companies
+- permissions
+- funcional
+  - cadencia
+- zero setup
+
+`Cadencia` is global and not tenant-scoped.
+
+### Cowork
+
+Tenant-first operational surface. It includes:
+
+- overview
+- metricas
+- metodos
+- support
+  - strategy
+  - grupos
+  - utilizadores
+  - reunioes
+
+`Support` is only accessible to `support`, `superuser`, or `god` impersonating a tenant.
+
+## Current Architecture
+
+### Frontend
+
+- React
+- Vite
+- TypeScript
+- TanStack Query
+- React Router
+
+Main frontend area:
+
+- [apps/web/src](/Users/ruipereira/kanobi/apps/web/src)
+
+Important files:
+
+- [App.tsx](/Users/ruipereira/kanobi/apps/web/src/App.tsx)
+- [Sidebar.tsx](/Users/ruipereira/kanobi/apps/web/src/components/Sidebar.tsx)
+- [Header.tsx](/Users/ruipereira/kanobi/apps/web/src/components/Header.tsx)
+- [Layout.tsx](/Users/ruipereira/kanobi/apps/web/src/components/Layout.tsx)
+- [workspace-api.ts](/Users/ruipereira/kanobi/apps/web/src/lib/workspace-api.ts)
+- [tenant-selection.tsx](/Users/ruipereira/kanobi/apps/web/src/context/tenant-selection.tsx)
+
+### Backend
+
+- Hono
+- Node.js
+- TypeScript
+- Drizzle ORM
+
+Main backend area:
+
+- [backend/src](/Users/ruipereira/kanobi/backend/src)
+
+Important files:
+
+- [index.ts](/Users/ruipereira/kanobi/backend/src/index.ts)
+- [workspace.ts](/Users/ruipereira/kanobi/backend/src/routes/workspace.ts)
+- [schema.ts](/Users/ruipereira/kanobi/backend/src/db/schema.ts)
+
+### Database
+
+The app now uses PostgreSQL, not SQLite.
+
+Important data model areas already created:
+
+- auth users
+- auth sessions
+- tenants
+- tenant memberships
+- platform roles
+- tenant roles
+- permissions
+- tenant-scoped role permissions
+- join requests
+- company setup
+- LLM configs
+- email configs
+- workspace access log
+- strategy entities
+- groups
+- meetings
+- meeting types / cadence
+- comments and reactions foundations
+
+Schema file:
+
+- [schema.ts](/Users/ruipereira/kanobi/backend/src/db/schema.ts)
+
+## Ports And Runtime
+
+Current local ports:
+
+- web: `5180`
+- backend: `3738`
+- postgres: `55432`
+
+Local URLs:
+
+- web: [http://127.0.0.1:5180](http://127.0.0.1:5180)
+- backend health: [http://127.0.0.1:3738/api/health](http://127.0.0.1:3738/api/health)
+
+Postgres connection:
+
+- host: `host.docker.internal:55432`
+- database: `kanobi`
+- user: `kanobi`
+- password: `kanobi`
+
+## Run The App
+
+### Docker
 
 ```bash
 git clone https://github.com/flydrgoncode/kanobi.git
 cd kanobi
-cp .env.example .env
-# Edit .env and set ANTHROPIC_API_KEY
-
-pnpm install
-pnpm dev              # starts all apps (web + backend)
-# or individually:
-pnpm dev:web          # http://localhost:5173
-pnpm dev:backend      # http://localhost:3737
-pnpm dev:mobile       # Expo Go (requires Expo CLI)
+docker compose up -d --build
 ```
 
-### Run with Docker
+Then open:
+
+- [http://127.0.0.1:5180](http://127.0.0.1:5180)
+
+### Useful Commands
 
 ```bash
-git clone https://github.com/flydrgoncode/kanobi.git
-cd kanobi
-cp .env.example .env
-# Edit .env and set ANTHROPIC_API_KEY
-
-docker compose up
-# Web:     http://localhost:5173
-# Backend: http://localhost:3737/api/health
+docker compose ps
+docker compose up -d --build web
+docker compose up -d --build backend
+curl http://127.0.0.1:3738/api/health
 ```
 
-### Database Setup
+### Typecheck And Build
 
 ```bash
-pnpm db:generate    # generate Drizzle migrations from schema
-pnpm db:migrate     # apply migrations to kanobi.db
+npm --prefix apps/web run build
+npm --prefix backend run typecheck
 ```
 
-SQLite file is created at `./kanobi.db` (or at `DATABASE_PATH` if set). The Docker volume `db_data` persists it across container restarts.
+## How Session Context Works
 
----
+Tenant context is not trusted from the browser DOM.
 
-## Stack
+The app uses server-side session context:
 
-| Layer | Technology |
-|---|---|
-| Web | React 18 + Vite 6 + TypeScript + Tailwind CSS v3 + shadcn/ui |
-| Mobile | Expo 52 (React Native) + TypeScript |
-| Desktop | Tauri 2.x (wraps web frontend) |
-| Backend | Hono 4 + Node.js 22 + TypeScript, port 3737 |
-| Database | SQLite via Drizzle ORM + better-sqlite3 (local-first) |
-| AI/LLM | Vercel AI SDK 4 + @ai-sdk/anthropic (claude-sonnet-4-6) |
-| State | Zustand 5 + TanStack Query v5 |
-| Auth | JWT (jose) |
-| Monorepo | pnpm workspaces + Turborepo 2 |
-| Testing | Vitest |
-| CI | GitHub Actions |
-| Container | Docker + Docker Compose (multi-stage builds) |
+- current session is stored in PostgreSQL
+- active tenant is stored in session on the backend
+- frontend asks the backend for context
+- backend resolves tenant access from session + role
 
-## Structure
+This is what prevents a user from just editing HTML and swapping tenant ids manually.
 
-```
-kanobi/
-├── apps/
-│   ├── web/                # React SPA (Vite), port 5173
-│   │   ├── src/
-│   │   │   ├── pages/Welcome.tsx
-│   │   │   ├── App.tsx
-│   │   │   ├── main.tsx
-│   │   │   └── index.css
-│   │   ├── Dockerfile      # multi-stage → nginx
-│   │   └── nginx.conf      # SPA fallback + /api proxy
-│   ├── mobile/             # Expo React Native
-│   └── desktop/            # Tauri 2 wrapper
-├── packages/
-│   ├── ui/                 # Shared React components (Button, Card)
-│   └── types/              # Shared TypeScript types
-├── backend/
-│   ├── src/
-│   │   ├── index.ts        # Hono server entry, port 3737
-│   │   ├── routes/
-│   │   │   ├── health.ts   # GET /api/health
-│   │   │   └── chat.ts     # POST /api/chat (AI streaming)
-│   │   └── db/
-│   │       ├── schema.ts   # Drizzle tables (messages, conversations)
-│   │       ├── index.ts    # DB connection singleton
-│   │       └── migrate.ts  # Migration runner
-│   ├── drizzle.config.ts
-│   ├── Dockerfile          # multi-stage → node:22-alpine
-│   └── package.json
-├── docker-compose.yml      # backend + web services
-├── .env.example
-├── package.json            # root workspace scripts
-├── pnpm-workspace.yaml
-├── turbo.json
-└── tsconfig.base.json
-```
+## How To Reconstruct Context For A New LLM
 
-## API
+If a new LLM takes over the repo, it should rebuild context in this order:
 
-| Method | Path | Description |
-|---|---|---|
-| GET | `/api/health` | Health check — returns `{ status: "ok", timestamp }` |
-| POST | `/api/chat` | AI chat stream — body: `{ messages: [{role, content}] }` |
+### 1. Start from the product surfaces
 
-## Development Scripts
+Read:
+
+- [App.tsx](/Users/ruipereira/kanobi/apps/web/src/App.tsx)
+- [Sidebar.tsx](/Users/ruipereira/kanobi/apps/web/src/components/Sidebar.tsx)
+- [Header.tsx](/Users/ruipereira/kanobi/apps/web/src/components/Header.tsx)
+
+This explains:
+
+- Mission Control routes
+- Workspace routes
+- Cowork routes
+- tenant selector behavior
+
+### 2. Read the backend entry and main route file
+
+Read:
+
+- [index.ts](/Users/ruipereira/kanobi/backend/src/index.ts)
+- [workspace.ts](/Users/ruipereira/kanobi/backend/src/routes/workspace.ts)
+
+This explains:
+
+- session handling
+- `god` mode
+- tenant context
+- CRUD endpoints
+- role access rules
+
+### 3. Read the database schema
+
+Read:
+
+- [schema.ts](/Users/ruipereira/kanobi/backend/src/db/schema.ts)
+
+This is the source of truth for:
+
+- auth
+- tenancy
+- permissions
+- strategy
+- groups
+- meetings
+
+### 4. Check the main UI pages
+
+Mission Control:
+
+- [MissionControl.tsx](/Users/ruipereira/kanobi/apps/web/src/pages/MissionControl.tsx)
+- [Users.tsx](/Users/ruipereira/kanobi/apps/web/src/pages/Users.tsx)
+- [Requests.tsx](/Users/ruipereira/kanobi/apps/web/src/pages/Requests.tsx)
+- [Companies.tsx](/Users/ruipereira/kanobi/apps/web/src/pages/Companies.tsx)
+- [Permissions.tsx](/Users/ruipereira/kanobi/apps/web/src/pages/Permissions.tsx)
+- [Integrations.tsx](/Users/ruipereira/kanobi/apps/web/src/pages/Integrations.tsx)
+- [SeedData.tsx](/Users/ruipereira/kanobi/apps/web/src/pages/SeedData.tsx)
+
+Cowork:
+
+- [CoworkOverview.tsx](/Users/ruipereira/kanobi/apps/web/src/pages/CoworkOverview.tsx)
+- [CoworkStrategy.tsx](/Users/ruipereira/kanobi/apps/web/src/pages/CoworkStrategy.tsx)
+- [CoworkUsers.tsx](/Users/ruipereira/kanobi/apps/web/src/pages/CoworkUsers.tsx)
+- [CoworkGroups.tsx](/Users/ruipereira/kanobi/apps/web/src/pages/CoworkGroups.tsx)
+- [CoworkMeetings.tsx](/Users/ruipereira/kanobi/apps/web/src/pages/CoworkMeetings.tsx)
+
+Workspace:
+
+- [CoworkMeetingTypes.tsx](/Users/ruipereira/kanobi/apps/web/src/pages/CoworkMeetingTypes.tsx)
+
+### 5. Rebuild runtime locally
 
 ```bash
-pnpm dev          # all apps via Turborepo
-pnpm dev:web      # web only
-pnpm dev:backend  # backend only
-pnpm dev:mobile   # mobile (Expo)
-pnpm build        # production build all
-pnpm test         # Vitest
-pnpm typecheck    # tsc --noEmit all packages
-pnpm lint         # ESLint
-pnpm format       # Prettier
-pnpm db:generate  # Drizzle Kit generate
-pnpm db:migrate   # apply migrations
+docker compose up -d --build
+docker compose ps
+curl http://127.0.0.1:3738/api/health
 ```
 
-## CI
+### 6. Verify key pages
 
-GitHub Actions runs on every push/PR to `main`:
-- **typecheck** — `pnpm typecheck` across all packages
-- **test** — `pnpm test`
-- **docker** — builds `backend/Dockerfile` and `apps/web/Dockerfile` with layer caching
+- Mission Control: [http://127.0.0.1:5180/mission-control](http://127.0.0.1:5180/mission-control)
+- Cowork meetings: [http://127.0.0.1:5180/cowork/support/meetings](http://127.0.0.1:5180/cowork/support/meetings)
+- Workspace cadence: [http://127.0.0.1:5180/workspace/functional/meeting-types](http://127.0.0.1:5180/workspace/functional/meeting-types)
 
-## Known Issues / macOS Notes
+## Notes For Future Work
 
-- If `pnpm install` fails with `corepack` errors, run `sudo npm install -g pnpm@9.15.4` first.
-- Tauri desktop requires Rust (`rustup`) and Xcode CLI tools installed.
-- The Expo mobile app requires Expo Go on a physical device or an iOS Simulator with Xcode.
-- `DATABASE_PATH` must be an absolute path when running inside Docker (the compose file sets it to `/data/kanobi.db` on the volume).
+- `Workspace` and `Cowork` are now clearly separate surfaces
+- `Cadencia` is global and not tied to any tenant
+- real `Cowork` meetings are tenant-scoped
+- `Zero` is protected and should remain unique
+- `god` can operate in global mode and impersonate a company context
+
+## Repository
+
+Remote:
+
+- [https://github.com/flydrgoncode/kanobi](https://github.com/flydrgoncode/kanobi)

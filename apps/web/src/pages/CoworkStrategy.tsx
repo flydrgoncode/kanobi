@@ -360,7 +360,17 @@ export default function CoworkStrategy() {
                   />
                 </div>
 
-                <div className="space-y-3">
+                <div className="rounded-xl border border-border-subtle bg-bg-surface">
+                  {list.length ? (
+                    <div className="border-b border-border-subtle px-4 py-3">
+                      <div className="grid grid-cols-[minmax(0,1.2fr)_minmax(0,2fr)_auto] items-center gap-4">
+                        <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Nome curto</div>
+                        <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Descrição</div>
+                        <div className="text-right text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Ações</div>
+                      </div>
+                    </div>
+                  ) : null}
+                <div className="space-y-3 p-3">
                   {list.length ? (
                     list.map((item) => (
                       <div
@@ -407,6 +417,7 @@ export default function CoworkStrategy() {
                         : "Ainda nao existem obstaculos para esta empresa."}
                     </div>
                   )}
+                </div>
                 </div>
               </section>
             )}

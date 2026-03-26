@@ -40,6 +40,8 @@ type GroupItem = {
 
 type NavItem = LeafItem | GroupItem;
 
+const WORKSPACE_VERSION = "v0.1.0";
+
 const workspaceSections: Array<{ title: string; items: NavItem[] }> = [
   {
     title: "Mission Control",
@@ -143,6 +145,11 @@ export function Sidebar({ context, role }: SidebarProps) {
                   ? "Company workspace"
                   : "Mission Control"}
             </div>
+            {context === "workspace" ? (
+              <div className="mt-2 inline-flex rounded-full border border-white/12 bg-white/8 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/75">
+                {WORKSPACE_VERSION}
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

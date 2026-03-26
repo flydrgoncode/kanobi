@@ -49,6 +49,10 @@ function formatDateTime(value: string) {
   }).format(new Date(value));
 }
 
+function toApiDateTime(value: string) {
+  return new Date(value).toISOString();
+}
+
 export default function CoworkMeetings() {
   const { selectedTenantId, selectedTenantName, isHydrating } = useTenantSelection();
   const queryClient = useQueryClient();
@@ -106,6 +110,7 @@ export default function CoworkMeetings() {
   const groups = data?.groups ?? [];
   const meetingTypes = data?.meetingTypes ?? [];
   const users = usersData?.users ?? [];
+  const meetingTypeMap = new Map(meetingTypes.map((type) => [type.id, type.name]));
 
   const visibleMeetings = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -156,15 +161,18 @@ export default function CoworkMeetings() {
     event.preventDefault();
     if (!draft.meetingTypeId || !draft.name.trim() || !draft.scheduledAt) return;
 
+    const payload = {
+      ...draft,
+      scheduledAt: toApiDateTime(draft.scheduledAt),
+      focus: draft.focus || null,
+      outcome: draft.outcome || null,
+      notes: draft.notes || null,
+    };
+
     if (selectedMeetingId) {
-      await updateMutation.mutateAsync({ id: selectedMeetingId, payload: draft });
+      await updateMutation.mutateAsync({ id: selectedMeetingId, payload: payload as DraftState });
     } else {
-      await createMutation.mutateAsync({
-        ...draft,
-        focus: draft.focus || null,
-        outcome: draft.outcome || null,
-        notes: draft.notes || null,
-      });
+      await createMutation.mutateAsync(payload);
     }
     closeEditor();
   };
@@ -223,14 +231,26 @@ export default function CoworkMeetings() {
               </div>
             </div>
 
+            <div className="border-b border-border-subtle px-8 py-3">
+              <div className="grid items-center gap-4 xl:grid-cols-[minmax(220px,1fr)_160px_minmax(240px,1fr)_minmax(180px,0.8fr)_170px]">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Reunião</div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Tipo</div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Grupos</div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Participantes</div>
+                <div className="text-right text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Ações</div>
+              </div>
+            </div>
             <div className="divide-y divide-border-subtle">
               {visibleMeetings.map((meeting) => (
-                <article key={meeting.id} className="grid items-center gap-4 px-8 py-4 xl:grid-cols-[minmax(220px,1fr)_minmax(240px,1fr)_minmax(180px,0.8fr)_170px]">
+                <article key={meeting.id} className="grid items-center gap-4 px-8 py-4 xl:grid-cols-[minmax(220px,1fr)_160px_minmax(240px,1fr)_minmax(180px,0.8fr)_170px]">
                   <div className="min-w-0">
                     <button type="button" onClick={() => openEdit(meeting)} className="truncate text-left text-sm font-semibold text-[var(--context-accent)]">
                       {meeting.name}
                     </button>
                     <div className="truncate text-xs text-text-muted">{formatDateTime(meeting.scheduledAt)}</div>
+                  </div>
+                  <div className="truncate text-sm text-text-muted">
+                    {meetingTypeMap.get(meeting.meetingTypeId) ?? "Sem tipo"}
                   </div>
                   <div className="truncate text-sm text-text-muted">
                     {meeting.groups.length ? meeting.groups.map((group) => group.groupName).join(", ") : "Sem grupos"}
@@ -257,7 +277,7 @@ export default function CoworkMeetings() {
 
       {isEditorOpen ? (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/35 p-4">
-          <form onSubmit={submit} className="panel modal-surface w-full max-w-[54rem] p-5 shadow-2xl">
+          <form onSubmit={submit} className="panel modal-surface w-full max-w-[68rem] p-5 shadow-2xl">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">Reuniao</div>
@@ -266,67 +286,86 @@ export default function CoworkMeetings() {
               <button type="button" onClick={closeEditor} className="rounded-lg border border-border-subtle px-3 py-2 text-xs font-semibold text-text-main">Cancelar</button>
             </div>
 
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <label className="block">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">Tipo</span>
-                <select value={draft.meetingTypeId} onChange={(event) => setDraft((current) => ({ ...current, meetingTypeId: event.target.value }))} className="w-full rounded-lg border border-border-subtle bg-bg-base px-4 py-3 text-sm text-text-main outline-none">
-                  {meetingTypes.map((type) => (
-                    <option key={type.id} value={type.id}>{type.name}</option>
-                  ))}
-                </select>
-              </label>
-              <label className="block">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">Estado</span>
-                <select value={draft.status} onChange={(event) => setDraft((current) => ({ ...current, status: event.target.value as DraftState["status"] }))} className="w-full rounded-lg border border-border-subtle bg-bg-base px-4 py-3 text-sm text-text-main outline-none">
-                  <option value="scheduled">Agendada</option>
-                  <option value="completed">Concluida</option>
-                  <option value="cancelled">Cancelada</option>
-                </select>
-              </label>
-              <label className="block md:col-span-2">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">Nome</span>
-                <input value={draft.name} onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))} className="w-full rounded-lg border border-border-subtle bg-bg-base px-4 py-3 text-sm text-text-main outline-none" />
-              </label>
-              <label className="block">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">Data e hora</span>
-                <input type="datetime-local" value={draft.scheduledAt} onChange={(event) => setDraft((current) => ({ ...current, scheduledAt: event.target.value }))} className="w-full rounded-lg border border-border-subtle bg-bg-base px-4 py-3 text-sm text-text-main outline-none" />
-              </label>
-              <label className="block">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">Duracao (min)</span>
-                <input type="number" min={15} value={draft.durationMinutes} onChange={(event) => setDraft((current) => ({ ...current, durationMinutes: Number(event.target.value) || 60 }))} className="w-full rounded-lg border border-border-subtle bg-bg-base px-4 py-3 text-sm text-text-main outline-none" />
-              </label>
-              <label className="block md:col-span-2">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">Focus</span>
-                <input value={draft.focus} onChange={(event) => setDraft((current) => ({ ...current, focus: event.target.value }))} className="w-full rounded-lg border border-border-subtle bg-bg-base px-4 py-3 text-sm text-text-main outline-none" />
-              </label>
-              <label className="block md:col-span-2">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">Outcome</span>
-                <textarea rows={2} value={draft.outcome} onChange={(event) => setDraft((current) => ({ ...current, outcome: event.target.value }))} className="w-full rounded-lg border border-border-subtle bg-bg-base px-4 py-3 text-sm text-text-main outline-none" />
-              </label>
-              <label className="block md:col-span-2">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">Notas</span>
-                <textarea rows={3} value={draft.notes} onChange={(event) => setDraft((current) => ({ ...current, notes: event.target.value }))} className="w-full rounded-lg border border-border-subtle bg-bg-base px-4 py-3 text-sm text-text-main outline-none" />
-              </label>
-              <div>
-                <div className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">Grupos</div>
-                <div className="max-h-52 space-y-2 overflow-y-auto rounded-lg border border-border-subtle bg-bg-base p-3">
-                  {groups.map((group) => (
-                    <label key={group.id} className="flex items-center gap-3 text-sm text-text-main">
-                      <input type="checkbox" checked={draft.groupIds.includes(group.id)} onChange={(event) => setDraft((current) => ({ ...current, groupIds: event.target.checked ? [...current.groupIds, group.id] : current.groupIds.filter((id) => id !== group.id) }))} />
-                      <span>{group.name}</span>
-                    </label>
-                  ))}
-                </div>
+            <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="block">
+                  <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">Tipo</span>
+                  <select value={draft.meetingTypeId} onChange={(event) => setDraft((current) => ({ ...current, meetingTypeId: event.target.value }))} className="w-full rounded-lg border border-border-subtle bg-bg-base px-4 py-3 text-sm text-text-main outline-none">
+                    {meetingTypes.map((type) => (
+                      <option key={type.id} value={type.id}>{type.name}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="block">
+                  <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">Estado</span>
+                  <select value={draft.status} onChange={(event) => setDraft((current) => ({ ...current, status: event.target.value as DraftState["status"] }))} className="w-full rounded-lg border border-border-subtle bg-bg-base px-4 py-3 text-sm text-text-main outline-none">
+                    <option value="scheduled">Agendada</option>
+                    <option value="completed">Concluida</option>
+                    <option value="cancelled">Cancelada</option>
+                  </select>
+                </label>
+                <label className="block md:col-span-2">
+                  <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">Nome</span>
+                  <input value={draft.name} onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))} className="w-full rounded-lg border border-border-subtle bg-bg-base px-4 py-3 text-sm text-text-main outline-none" />
+                </label>
+                <label className="block">
+                  <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">Data e hora</span>
+                  <input type="datetime-local" value={draft.scheduledAt} onChange={(event) => setDraft((current) => ({ ...current, scheduledAt: event.target.value }))} className="w-full rounded-lg border border-border-subtle bg-bg-base px-4 py-3 text-sm text-text-main outline-none" />
+                </label>
+                <label className="block">
+                  <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">Duracao (min)</span>
+                  <input type="number" min={15} value={draft.durationMinutes} onChange={(event) => setDraft((current) => ({ ...current, durationMinutes: Number(event.target.value) || 60 }))} className="w-full rounded-lg border border-border-subtle bg-bg-base px-4 py-3 text-sm text-text-main outline-none" />
+                </label>
+                <label className="block md:col-span-2">
+                  <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">Focus</span>
+                  <input value={draft.focus} onChange={(event) => setDraft((current) => ({ ...current, focus: event.target.value }))} className="w-full rounded-lg border border-border-subtle bg-bg-base px-4 py-3 text-sm text-text-main outline-none" />
+                </label>
+                <label className="block md:col-span-2">
+                  <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">Outcome</span>
+                  <textarea rows={2} value={draft.outcome} onChange={(event) => setDraft((current) => ({ ...current, outcome: event.target.value }))} className="w-full rounded-lg border border-border-subtle bg-bg-base px-4 py-3 text-sm text-text-main outline-none" />
+                </label>
+                <label className="block md:col-span-2">
+                  <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">Notas</span>
+                  <textarea rows={3} value={draft.notes} onChange={(event) => setDraft((current) => ({ ...current, notes: event.target.value }))} className="w-full rounded-lg border border-border-subtle bg-bg-base px-4 py-3 text-sm text-text-main outline-none" />
+                </label>
               </div>
-              <div>
-                <div className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">Participantes</div>
-                <div className="max-h-52 space-y-2 overflow-y-auto rounded-lg border border-border-subtle bg-bg-base p-3">
-                  {users.map((user) => (
-                    <label key={user.id} className="flex items-center gap-3 text-sm text-text-main">
-                      <input type="checkbox" checked={draft.participantMembershipIds.includes(user.id)} onChange={(event) => setDraft((current) => ({ ...current, participantMembershipIds: event.target.checked ? [...current.participantMembershipIds, user.id] : current.participantMembershipIds.filter((id) => id !== user.id) }))} />
-                      <span>{user.name}</span>
-                    </label>
-                  ))}
+              <div className="grid gap-4">
+                <div className="rounded-xl border border-border-subtle bg-bg-base p-4">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <div>
+                      <div className="text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">Grupos</div>
+                      <div className="mt-1 text-xs text-text-muted">Escolhe um ou mais grupos do tenant.</div>
+                    </div>
+                    <div className="text-xs text-text-muted">{draft.groupIds.length} selecionados</div>
+                  </div>
+                  <div className="max-h-44 space-y-2 overflow-y-auto pr-1">
+                    {groups.length ? groups.map((group) => (
+                      <label key={group.id} className="flex items-center gap-3 rounded-lg border border-border-subtle px-3 py-2 text-sm text-text-main">
+                        <input type="checkbox" checked={draft.groupIds.includes(group.id)} onChange={(event) => setDraft((current) => ({ ...current, groupIds: event.target.checked ? [...current.groupIds, group.id] : current.groupIds.filter((id) => id !== group.id) }))} />
+                        <span className="truncate">{group.name}</span>
+                      </label>
+                    )) : <div className="rounded-lg border border-dashed border-border-subtle px-3 py-4 text-sm text-text-muted">Sem grupos disponiveis neste tenant.</div>}
+                  </div>
+                </div>
+                <div className="rounded-xl border border-border-subtle bg-bg-base p-4">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <div>
+                      <div className="text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">Utilizadores</div>
+                      <div className="mt-1 text-xs text-text-muted">Escolhe participantes pertencentes ao tenant.</div>
+                    </div>
+                    <div className="text-xs text-text-muted">{draft.participantMembershipIds.length} selecionados</div>
+                  </div>
+                  <div className="max-h-56 space-y-2 overflow-y-auto pr-1">
+                    {users.length ? users.map((user) => (
+                      <label key={user.id} className="flex items-center gap-3 rounded-lg border border-border-subtle px-3 py-2 text-sm text-text-main">
+                        <input type="checkbox" checked={draft.participantMembershipIds.includes(user.id)} onChange={(event) => setDraft((current) => ({ ...current, participantMembershipIds: event.target.checked ? [...current.participantMembershipIds, user.id] : current.participantMembershipIds.filter((id) => id !== user.id) }))} />
+                        <div className="min-w-0">
+                          <div className="truncate font-medium text-text-main">{user.name}</div>
+                          <div className="truncate text-xs text-text-muted">{user.email}</div>
+                        </div>
+                      </label>
+                    )) : <div className="rounded-lg border border-dashed border-border-subtle px-3 py-4 text-sm text-text-muted">Sem utilizadores disponiveis neste tenant.</div>}
+                  </div>
                 </div>
               </div>
             </div>

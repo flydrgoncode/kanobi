@@ -189,6 +189,13 @@ export default function CoworkGroups() {
               </div>
             </div>
 
+            <div className="border-b border-border-subtle px-8 py-3">
+              <div className="grid items-center gap-4 xl:grid-cols-[minmax(260px,1fr)_minmax(240px,1.2fr)_170px]">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Grupo</div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Membros</div>
+                <div className="text-right text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Ações</div>
+              </div>
+            </div>
             <div className="divide-y divide-border-subtle">
               {visibleGroups.map((group) => (
                 <article
